@@ -52,14 +52,24 @@ export async function runCloudJob(id:string,pair:boolean){
   }
   stage='leitura do grupo Mercado';
   await status('sincronizando','Lendo textos e reações do grupo Mercado…');
-  const config=await marketConfig();if(!config.enabled)throw Error('Conexão desativada.');const chats=await client.getChats(),matches=chats.filter((c:any)=>c.isGroup&&(config.groupId?c.id._serialized===config.groupId:c.name==='Mercado'));
-  if(matches.length!==1)throw Error(matches.length>1?'Há mais de um grupo Mercado. É necessário selecionar o grupo correto.':'O grupo Mercado não foi encontrado nesta conta.');const chat=matches[0];await marketHeartbeat(chat.id._serialized,config);
+  const config=await marketConfig();if(!config.enabled)throw Error('Conexão desativada.');
+  stage='localização do grupo Mercado';
+  const matches=await client.pupPage.evaluate((groupId:string|undefined)=>{
+   const store=(window as any).Store;
+   return store.Chat.getModelsArray().filter((c:any)=>c.id?.server==='g.us'&&(groupId?c.id._serialized===groupId:(c.name||c.formattedTitle)==='Mercado')).map((c:any)=>({id:c.id._serialized}));
+  },config.groupId);
+
+  if(matches.length!==1)throw Error(matches.length>1?'Há mais de um grupo Mercado. É necessário selecionar o grupo correto.':'O grupo Mercado não foi encontrado nesta conta.');stage='abertura do grupo Mercado';const chat=await client.getChatById(matches[0].id);if(!chat)throw Error('O grupo Mercado ainda não carregou. Aguarde e sincronize novamente.');
+  stage='vinculação do grupo Mercado';await marketHeartbeat(chat.id._serialized,config);
   const weekStart=marketWeekStart(new Date(started)),limit=2000;
+  stage='consulta do histórico semanal';
   const state=await getMarketState(),messages=(await chat.fetchMessages({limit})).sort((a:any,b:any)=>a.timestamp-b.timestamp);let count=0;
   const historyLimited=messages.length>=limit&&messages[0].timestamp*1000>=weekStart;
   for(const m of messages){if(Date.now()-started>210000)throw Error('A sincronização atingiu o limite de tempo. Os registros já recebidos foram preservados.');if(m.type!=='chat'||!m.body?.trim())continue;const messageId=digest(sdkId(m.id)),previous=state.messages[messageId];if(m.timestamp*1000<weekStart||m.timestamp*1000>started)continue;
    if(!(await marketConfig()).enabled)throw Error('Conexão desativada.');
+   stage='importação dos itens';
    await processMarketEvent({kind:'message',groupId:chat.id._serialized,messageId,at:m.timestamp*1000,text:m.body.slice(0,4000)});count++;
+   stage='leitura das reações';
    const reactions=await m.getReactions();const seen=new Set<string>();
    for(const list of reactions){for(const r of list.senders||[]){if(!r.senderId)continue;const actor=digest(r.senderId),emoji=r.reaction||list.id||'';seen.add(actor);const at=Math.trunc(r.timestamp>1e12?r.timestamp:r.timestamp*1000);if(!Number.isFinite(at))continue;await processMarketEvent({kind:'reaction',groupId:chat.id._serialized,messageId,actor,emoji,at});}}
    for(const [actor,r]of Object.entries(previous?.reactions||{})){if(!seen.has(actor)&&reactionKind(r.emoji))await processMarketEvent({kind:'reaction',groupId:chat.id._serialized,messageId,actor,emoji:'',at:Date.now()});}
@@ -68,7 +78,7 @@ export async function runCloudJob(id:string,pair:boolean){
   await client.destroy();client=undefined;finished=true;
   await put('whatsapp:cloud:session',sealWhatsApp(await archiveProfile(authPath),secret()));
   const synced=new Date().toISOString();await put('whatsapp:cloud:last-sync',synced);phase='conectado';await status(phase,`${count} mensagem(ns) verificada(s). ${historyLimited?'Histórico parcial: o grupo ultrapassou o limite de 2.000 mensagens; nem todos os itens da semana podem ter sido recuperados.':'Itens da semana atual verificados, desde segunda-feira (Brasília).'}`,{count});
- }catch(e){const text=e instanceof Error?e.message:'';const safe=/^(O WhatsApp|O tempo|A conexão|O grupo|Há mais|A sincronização|Conexão desativada|Sessão maior)/.test(text)?text:`Falha na etapa: ${stage}. Código: ${/Protocol error|Target closed|Session closed|Connection closed/.test(text)?'WA_BROWSER_CLOSED':/ENOENT|executable|shared libraries/.test(text)?'WA_BROWSER_START':/Evaluation failed|Cannot read properties/.test(text)?'WA_WEB_INIT':'WA_SESSION'}.`;console.error('WhatsApp cloud failure',{stage,code:/Protocol error|Target closed|Session closed|Connection closed/.test(text)?'WA_BROWSER_CLOSED':/ENOENT|executable|shared libraries/.test(text)?'WA_BROWSER_START':/Evaluation failed|Cannot read properties/.test(text)?'WA_WEB_INIT':'WA_SESSION',errorType:e instanceof Error?e.name:'Unknown'});await status('erro',safe).catch(()=>{});
+ }catch(e){const text=e instanceof Error?e.message:'';const safe=/^(O WhatsApp|O tempo|A conexão|O grupo|Há mais|A sincronização|Conexão desativada|Sessão maior)/.test(text)?text:`Falha na etapa: ${stage}. Código: ${/Protocol error|Target closed|Session closed|Connection closed/.test(text)?'WA_BROWSER_CLOSED':/ENOENT|executable|shared libraries/.test(text)?'WA_BROWSER_START':/Evaluation failed|Cannot read properties/.test(text)?'WA_WEB_INIT':'WA_SESSION'}.`;console.error('WhatsApp cloud failure',{stage,code:/Protocol error|Target closed|Session closed|Connection closed/.test(text)?'WA_BROWSER_CLOSED':/ENOENT|executable|shared libraries/.test(text)?'WA_BROWSER_START':/Evaluation failed|Cannot read properties/.test(text)?'WA_WEB_INIT':'WA_SESSION',errorType:e instanceof Error?e.name:'Unknown',databaseCode:typeof (e as any)?.code==='string'&&/^[0-9A-Z]{5}$/.test((e as any).code)?(e as any).code:undefined});await status('erro',safe).catch(()=>{});
  }finally{finished=true;if(client)await client.destroy().catch(()=>{});if(dir)await rm(dir,{recursive:true,force:true}).catch(()=>{});await sql().query("DELETE FROM planner_settings WHERE key='whatsapp:cloud:qr'",[]).catch(()=>{});await sql().query("DELETE FROM planner_settings WHERE key='whatsapp:cloud:lock' AND (value::jsonb->>'id')=$1",[id]).catch(()=>{});}
 }
 export async function alreadySyncedToday(){const d=await read('whatsapp:cloud:last-sync');return !!d&&new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(d))===today();}
