@@ -1,0 +1,1 @@
+import {auth,isOwner} from '@/auth';import {redirect} from 'next/navigation';import Planner from './planner-client';export const dynamic='force-dynamic';export default async function Page(){if(!await isOwner())redirect('/login');const s=await auth();return <Planner name={s?.user?.name?.split(' ')[0]||'Cheila'}/>}

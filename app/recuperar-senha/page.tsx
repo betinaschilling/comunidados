@@ -1,0 +1,1 @@
+import Shell from '../login/shell';import {RequestForm} from '../login/forms';export default function Page(){return <Shell title='Teu acesso, de volta.' description='Recebe um link no teu e-mail para criar ou recuperar tua senha.'><RequestForm/></Shell>}

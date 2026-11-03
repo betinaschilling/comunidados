@@ -1,0 +1,1 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {isAllowedEmail} from '../lib/access';test('acesso exclusivo à conta ComuniDados',()=>{assert.ok(isAllowedEmail('cheila@comunidados.tech'));for(const email of ['betina.ssc@gmail.com','outra@comunidados.tech',null,undefined,'cheila@comunidados.tech.evil.com'])assert.equal(isAllowedEmail(email),false);});

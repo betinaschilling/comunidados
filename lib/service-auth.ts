@@ -1,0 +1,1 @@
+import {timingSafeEqual} from 'node:crypto';export function serviceAuth(req:Request){const secret=process.env.PLANNER_AGENT_TOKEN;const actual=req.headers.get('authorization')?.replace(/^Bearer /,'')||'';return !!secret&&secret.length>=32&&Buffer.byteLength(actual)===Buffer.byteLength(secret)&&timingSafeEqual(Buffer.from(actual),Buffer.from(secret));}

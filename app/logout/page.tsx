@@ -1,0 +1,1 @@
+import {signOut} from '@/auth';export default function Page(){return <main className='entry-form'><form action={async()=>{'use server';await signOut({redirectTo:'/'});}}><button className='primary'>Sair da conta</button></form></main>}

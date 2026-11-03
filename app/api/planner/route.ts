@@ -1,0 +1,5 @@
+import {isOwner} from '@/auth';
+import {list,put,ensure,json,sameOrigin,validItem} from '@/lib/planner';
+export const dynamic='force-dynamic';
+export async function GET(){if(!await isOwner())return json({error:'Entre para continuar.'},401);return json({items:await list()})}
+export async function POST(req:Request){if(!await isOwner())return json({error:'Entre para continuar.'},401);if(!sameOrigin(req))return json({error:'Origem inválida'},403);try{const body=await req.json();if(body.action==='prepare'){await ensure();return json({ok:true})}if(body.action==='save'){if(!validItem(body.item))return json({error:'Confira os campos da atividade.'},400);const existing=(await list()).find(i=>i.id===body.item.id);if(existing&&existing.routine!==body.item.routine)return json({error:'Tipo inválido'},400);const i=body.item;i.completedAt=i.done?(existing?.done?existing.completedAt:new Date().toISOString()):null;await put(i);return json({ok:true})}return json({error:'Operação inválida'},400)}catch{return json({error:'Não foi possível salvar. Tenta novamente.'},500)}}

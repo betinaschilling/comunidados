@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {routines,validDate} from '../lib/planner';
+test('água soma 2700 ml em cada dia e pré-treino só acompanha treino',()=>{for(let i=2;i<=8;i++){const r=routines(`2026-11-0${i}`);assert.equal(r.filter(x=>x[1]==='Água').reduce((a,x)=>a+x[2],0),2700);assert.equal(r.some(x=>x[0]==='Pré-treino'),[2,3,4,5,7].includes(i));}});
+test('agenda semanal de exercício, medidas e vitaminas',()=>{assert.ok(routines('2026-11-02').some(x=>x[0]==='Pesagem e medidas'));assert.ok(routines('2026-11-05').some(x=>x[0].includes('B12')));assert.ok(routines('2026-11-08').some(x=>x[0].startsWith('Vitamina D')));assert.ok(!routines('2026-11-06').some(x=>x[1]==='Exercício'));});
+test('datas impossíveis são rejeitadas',()=>{assert.equal(validDate('2027-02-29'),false);assert.equal(validDate('2028-02-29'),true);assert.equal(validDate('2027-13-01'),false)});
