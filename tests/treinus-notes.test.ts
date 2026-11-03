@@ -1,0 +1,3 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {treinusPlan,personalNotes,updatePersonalNotes} from '../lib/treinus-notes';
+test('editar notas pessoais preserva a prescrição e não duplica o bloco',()=>{const notes='Minha nota\n\n[TREINUS_PLANEJADO]\nCorrer 3 km\n[/TREINUS_PLANEJADO]';assert.equal(treinusPlan(notes),'Correr 3 km');assert.equal(personalNotes(notes),'Minha nota');const saved=updatePersonalNotes(notes,'Outra nota');assert.equal(treinusPlan(saved),'Correr 3 km');assert.equal(personalNotes(saved),'Outra nota');assert.equal(updatePersonalNotes(saved,'Outra nota'),saved);assert.equal(personalNotes(updatePersonalNotes(notes,'')),'');assert.equal(updatePersonalNotes('Sem plano','Minha nota'),'Minha nota')});
