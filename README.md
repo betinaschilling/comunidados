@@ -26,7 +26,7 @@ POST /api/import aceita {items:[...]} com Bearer PLANNER_AGENT_TOKEN (32 ou mais
 ## Validação
 
 npm test; npm run build.
-Testes locais de allowlist, hash/verificação de senha, água, agenda semanal e datas. Fluxos de banco, e-mail e login real exigem integração configurada e validação em produção. Esta versão ainda precisa ser publicada e ativada.
+Testes locais de allowlist, hash/verificação de senha, água, agenda semanal e datas. Fluxos de banco, e-mail e login real exigem integração configurada e validação em produção. O projeto está publicado na Vercel por integração com o GitHub.
 
 ## Registros e situações
 
@@ -36,4 +36,8 @@ Acompanhamento → Registros abre o tabelão completo, inclusive datas futuras, 
 
 Fonte: betinaschilling/comunidados. Produção: branch main. Workflow comuni-bot executa testes e build em pushes, PRs e manualmente. Vercel usa integração Git nativa e também executa testes antes do build; publicação falha se os testes falharem. Não precisa de token Vercel dentro do GitHub. As chaves de banco, sessão e e-mail ficam nas variáveis da Vercel. O workflow valida código; não faz mudanças autônomas, nem edita dados ou resolve problemas sozinho.
 
-Publicar os arquivos na raiz do repositório, incluindo .github/workflows/comuni-bot.yml e vercel.json. Não enviar node_modules, .next, .env.local, exports pessoais ou o SQL privado da importação. Verificar o deployment disparado pelo commit da main antes de considerar a migração do fluxo concluída. Esta configuração está preparada, mas falta acesso de escrita à conta proprietária para o primeiro envio.
+Publicar os arquivos na raiz do repositório, incluindo .github/workflows/comuni-bot.yml e vercel.json. Não enviar node_modules, .next, .env.local, exports pessoais ou o SQL privado da importação. Verificar o deployment disparado pelo commit da main antes de considerar a migração do fluxo concluída. O fluxo está ativo; alterações na main disparam o deploy na Vercel.
+
+## Casa e família
+
+Quatro seções: Contas, Manutenções, Projetos e Lazer e diversão. Compromissos podem ter data exata ou período descritivo. Sem data exata, não geram atraso artificial. Dependências só liberam a conclusão quando o item de confirmação foi marcado como feito. As colunas household_group, period e depends_on são adicionadas por migração sem apagar dados.

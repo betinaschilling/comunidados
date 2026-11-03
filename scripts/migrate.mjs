@@ -10,3 +10,7 @@ await sql.query(`CREATE TABLE IF NOT EXISTS auth_limits(scope TEXT PRIMARY KEY,a
 
 await sql.query('ALTER TABLE planner_items ADD COLUMN IF NOT EXISTS not_done BOOLEAN NOT NULL DEFAULT FALSE',[]);
 await sql.query('ALTER TABLE planner_items ADD COLUMN IF NOT EXISTS sort_order INTEGER',[]);
+
+await sql.query('ALTER TABLE planner_items ADD COLUMN IF NOT EXISTS household_group TEXT',[]);
+await sql.query('ALTER TABLE planner_items ADD COLUMN IF NOT EXISTS period TEXT',[]);
+await sql.query('ALTER TABLE planner_items ADD COLUMN IF NOT EXISTS depends_on TEXT',[]);
