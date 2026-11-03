@@ -41,3 +41,6 @@ Publicar os arquivos na raiz do repositório, incluindo .github/workflows/comuni
 ## Casa e família
 
 Quatro seções: Contas, Manutenções, Projetos e Lazer e diversão. Compromissos podem ter data exata ou período descritivo. Sem data exata, não geram atraso artificial. Dependências só liberam a conclusão quando o item de confirmação foi marcado como feito. As colunas household_group, period e depends_on são adicionadas por migração sem apagar dados.
+
+
+Nothing is easy, my friend
