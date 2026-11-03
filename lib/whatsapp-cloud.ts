@@ -55,8 +55,8 @@ export async function runCloudJob(id:string,pair:boolean){
   const config=await marketConfig();if(!config.enabled)throw Error('Conexão desativada.');
   stage='localização do grupo Mercado';
   const matches=await client.pupPage.evaluate((groupId:string|undefined)=>{
-   const store=(window as any).Store;
-   return store.Chat.getModelsArray().filter((c:any)=>c.id?.server==='g.us'&&(groupId?c.id._serialized===groupId:(c.name||c.formattedTitle)==='Mercado')).map((c:any)=>({id:c.id._serialized}));
+   const chats=(window as any).require('WAWebCollections').Chat;
+   return chats.getModelsArray().filter((c:any)=>c.id?.server==='g.us'&&(groupId?c.id._serialized===groupId:(c.name||c.formattedTitle)==='Mercado')).map((c:any)=>({id:c.id._serialized}));
   },config.groupId);
 
   if(matches.length!==1)throw Error(matches.length>1?'Há mais de um grupo Mercado. É necessário selecionar o grupo correto.':'O grupo Mercado não foi encontrado nesta conta.');stage='abertura do grupo Mercado';const chat=await client.getChatById(matches[0].id);if(!chat)throw Error('O grupo Mercado ainda não carregou. Aguarde e sincronize novamente.');
