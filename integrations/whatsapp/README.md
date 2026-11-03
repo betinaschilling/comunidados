@@ -1,6 +1,6 @@
 # Ponte WhatsApp → Mercado do ComuniDados
 
-Conexão não oficial usando whatsapp-web.js. Pode desconectar ou resultar em bloqueio pelo WhatsApp. A ponte precisa permanecer ligada em um computador ou servidor com armazenamento persistente. A Vercel recebe os eventos, mas não mantém esta sessão de WhatsApp Web.
+Conexão não oficial usando whatsapp-web.js. Pode desconectar ou resultar em bloqueio pelo WhatsApp. A ponte precisa permanecer ligada em um computador ou servidor com armazenamento persistente. O projeto Next.js na Vercel recebe os eventos. A ponte atual usa disco persistente; uma implantação em Vercel Daemons exige adaptar a sessão e a fila para armazenamento externo, pois o disco dos Daemons é temporário. Essa adaptação ainda não está ativada.
 
 ## Instalar no computador que ficará ligado
 
@@ -32,3 +32,5 @@ Conexão não oficial usando whatsapp-web.js. Pode desconectar ou resultar em bl
 Para uma VPS, use túnel SSH local para acessar a porta 3077 sem expô-la, mantendo processo e volume persistentes. Reiniciar exige preservar `data/` e `.env`. Para desvincular, encerre o processo e remova a sessão em WhatsApp → Aparelhos conectados. Em Casa & família, “Desativar conexão” revoga a chave do recebimento. Gerar outra chave invalida a anterior.
 
 Documentação upstream: https://docs.wwebjs.dev/ e https://wwebjs.dev/guide/creating-your-bot/authentication.html.
+
+Para VPS/systemd, veja o modelo em [server/README.md](server/README.md). O modelo mantém a porta de pareamento em loopback, com acesso por túnel SSH.

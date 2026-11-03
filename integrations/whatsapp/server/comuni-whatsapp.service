@@ -1,0 +1,24 @@
+[Unit]
+Description=ComuniDados - ponte WhatsApp Mercado
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=comuni-bot
+Group=comuni-bot
+WorkingDirectory=/opt/comunidados/integrations/whatsapp
+EnvironmentFile=/etc/comunidados/whatsapp.env
+Environment=DATA_DIR=/var/lib/comuni-bot/whatsapp
+Environment=PUPPETEER_CACHE_DIR=/var/lib/comuni-bot/browser
+Environment=PORT=3077
+ExecStart=/usr/bin/node /opt/comunidados/integrations/whatsapp/bridge.mjs
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=30
+KillSignal=SIGINT
+PrivateTmp=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

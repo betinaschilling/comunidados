@@ -21,7 +21,7 @@ const idOf=id=>typeof id==='string'?id:id?._serialized;
 function groupOf(m){return m.fromMe?m.to:m.from;}
 async function message(m,force=false){if(!selected||groupOf(m)!==selected.id._serialized||m.type!=='chat'||!m.body?.trim())return;if(!force&&m.timestamp*1000<binding.startedAt)return;await enqueue({kind:'message',groupId:selected.id._serialized,messageId:hash(idOf(m.id)),at:m.timestamp*1000,text:m.body.slice(0,4000)});}
 const puppeteer={headless:true};if(process.env.CHROME_EXECUTABLE_PATH)puppeteer.executablePath=process.env.CHROME_EXECUTABLE_PATH;
-const client=new Client({authStrategy:new LocalAuth({dataPath:path.join(dir,'session')}),puppeteer});
+const client=new Client({authStrategy:new LocalAuth({dataPath:path.join(dir,'session')}),webVersionCache:{type:'local',path:path.join(dir,'web-cache')},puppeteer});
 client.on('qr',value=>{qr=value;phase='Leia o QR code no WhatsApp';});
 client.on('authenticated',()=>{qr=null;phase='Conectando';});
 client.on('auth_failure',()=>{qr=null;phase='Falha na autenticação';lastError='Reinicie a ponte e conecte novamente pelo QR code.';});
