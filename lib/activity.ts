@@ -6,5 +6,5 @@ export function activityStatus(i:Item,today:string,items:Item[]=[]):ActivityStat
 export function isPending(i:Item,today:string,items:Item[]=[]){return ['pendente','atrasado'].includes(activityStatus(i,today,items));}
 export function compareActivities(a:Item,b:Item){return (a.date||'9999-12-31').localeCompare(b.date||'9999-12-31')||activityOrder(a)-activityOrder(b)||a.title.localeCompare(b.title,'pt-BR')||a.id.localeCompare(b.id);}
 
-export const householdGroups=["Contas","Manutenções","Projetos","Lazer e diversão","Acordos com Paulo"] as const;
+export const householdGroups=["Contas","Manutenções","Projetos","Lazer e diversão","Acordos com Paulo","Limpeza","Jardim"] as const;
 export function householdGroup(i:Item){return i.householdGroup||(i.notes.includes("Tipo: Conta")||/^Pagar /i.test(i.title)?"Contas":"Projetos");}

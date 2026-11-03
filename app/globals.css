@@ -16,3 +16,5 @@
 .garmin-panel{margin-top:24px}.garmin-panel .panel-title p{max-width:650px;font-size:12px;line-height:1.7;color:var(--muted)}.garmin-panel details{margin:20px 0}.garmin-panel summary{cursor:pointer}.garmin-type{display:block;color:var(--muted);margin-top:5px}.garmin-metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}.garmin-metrics>div{padding:12px;background:var(--cream);border-radius:8px}.garmin-metrics small,.garmin-metrics b{display:block}.garmin-metrics small{font-size:11px;margin-bottom:8px;color:var(--muted)}.garmin-panel .record-filters .primary{align-self:end;min-height:40px}
 
 .treinus-plan{padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--paper);margin:18px 0}.treinus-plan p{white-space:pre-wrap;line-height:1.7;font-size:12px}.treinus-plan h3{font-size:14px}
+
+.household-daily{margin-top:20px}
