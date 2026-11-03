@@ -24,7 +24,7 @@ export async function runCloudJob(id:string,pair:boolean){
   const saved=pair?undefined:await read('whatsapp:cloud:session');if(!pair&&!saved){await status('aguardando-pareamento','Conecte o WhatsApp pelo QR code antes de sincronizar.');return;}
   dir=await mkdtemp(path.join(tmpdir(),'comuni-wa-'));const authPath=path.join(dir,'auth');await mkdir(authPath,{recursive:true,mode:0o700});if(saved)await restoreProfile(openWhatsApp(saved,secret()),authPath);
   const [{default:chromium},whatsapp]=await Promise.all([import('@sparticuz/chromium'),import('whatsapp-web.js')]);
-  const {Client,LocalAuth}=whatsapp;
+  const {Client,LocalAuth}=whatsapp.default;
   client=new Client({authStrategy:new LocalAuth({dataPath:authPath,clientId:'market'}),webVersionCache:{type:'local',path:path.join(dir,'web-cache')},puppeteer:{headless:true,executablePath:await chromium.executablePath(),args:chromium.args,timeout:45000}});
   const authenticated=new Promise<void>((resolve,reject)=>{
    client.on('qr',(qr:string)=>{if(finished)return;if(!pair){reject(Error('O WhatsApp pediu um novo pareamento. Abra o QR code no planner.'));return;}void put('whatsapp:cloud:qr',sealWhatsApp(Buffer.from(JSON.stringify({qr,expires:Date.now()+45000})),secret())).then(()=>status('qr','Escaneie o QR code em WhatsApp → Aparelhos conectados.')).catch(()=>reject(Error('Não foi possível preparar o pareamento.')));});
