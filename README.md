@@ -41,3 +41,7 @@ Publicar os arquivos na raiz do repositório, incluindo .github/workflows/comuni
 ## Casa e família
 
 Quatro seções: Contas, Manutenções, Projetos e Lazer e diversão. Compromissos podem ter data exata ou período descritivo. Sem data exata, não geram atraso artificial. Dependências só liberam a conclusão quando o item de confirmação foi marcado como feito. As colunas household_group, period e depends_on são adicionadas por migração sem apagar dados.
+
+## Garmin pessoal
+
+GARMIN_PERSONAL_API_KEY somente nas variáveis sensíveis da Vercel Production. API oficial: https://developer.garmin.com/gc-developer-program/personal/swagger-docs/. Sincronização manual autenticada em Rotina & saúde, até 90 dias. Atividades ficam no banco privado, identificadas pelo ID Garmin; só Corrida/Gym com data e modalidade correspondentes são vinculadas. Respostas e logs não expõem chaves. Não feito explícito, ambiguidades e treinos fora da agenda ficam para revisão; reimportar não desfaz marcações manuais. Fotos e notas são preservadas. A primeira consulta real valida a chave e o formato de resposta; testes locais usam fixtures do contrato oficial.
