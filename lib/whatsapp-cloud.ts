@@ -18,6 +18,13 @@ export async function claimCloudJob(pair:boolean){const c=await marketConfig();i
 async function archiveProfile(authPath:string){return new Promise<Buffer>((resolve,reject)=>{const archive=archiver('zip',{zlib:{level:6}}),chunks:Buffer[]=[];let total=0;archive.on('data',(chunk:Buffer)=>{total+=chunk.length;if(total>24*1024*1024){archive.abort();reject(Error('Sessão maior que o limite de armazenamento.'));return;}chunks.push(chunk)});archive.on('error',reject);archive.on('end',()=>resolve(Buffer.concat(chunks)));archive.directory(authPath,false,(entry:any)=>/(^|\/)(Cache|Code Cache|GPUCache|ShaderCache|GrShaderCache|DawnCache|Crashpad|BrowserMetrics)(\/|$)|(^|\/)Singleton/.test(entry.name)?false:entry);void archive.finalize();});}
 async function restoreProfile(bytes:Buffer,authPath:string){const unzipper=await import('unzipper');const stream=Readable.from([bytes]).pipe(unzipper.Parse({forceStream:true}));let total=0;for await(const entry of stream){const dest=path.resolve(authPath,entry.path);if(!dest.startsWith(path.resolve(authPath)+path.sep))throw Error('Arquivo de sessão inválido.');if(entry.type==='Directory'){await mkdir(dest,{recursive:true});entry.autodrain();}else{const bytes=await entry.buffer();total+=bytes.length;if(total>96*1024*1024)throw Error('Arquivo de sessão muito grande.');await mkdir(path.dirname(dest),{recursive:true});await writeFile(dest,bytes,{mode:0o600});}}}
 const sdkId=(id:any)=>typeof id==='string'?id:id?._serialized;
+export function marketWeekStart(now=new Date()){
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+ const part=(type:string)=>parts.find(p=>p.type===type)!.value;
+ const day=new Date(`${part('year')}-${part('month')}-${part('day')}T00:00:00Z`);
+ day.setUTCDate(day.getUTCDate()-(day.getUTCDay()+6)%7);
+ return Date.parse(day.toISOString().slice(0,10)+'T00:00:00-03:00');
+}
 export async function runCloudJob(id:string,pair:boolean){
  let client:any,dir:string|undefined,ready=false,finished=false;const started=Date.now();let phase='erro',stage='inicialização';
  try{
@@ -47,9 +54,10 @@ export async function runCloudJob(id:string,pair:boolean){
   await status('sincronizando','Lendo textos e reações do grupo Mercado…');
   const config=await marketConfig();if(!config.enabled)throw Error('Conexão desativada.');const chats=await client.getChats(),matches=chats.filter((c:any)=>c.isGroup&&(config.groupId?c.id._serialized===config.groupId:c.name==='Mercado'));
   if(matches.length!==1)throw Error(matches.length>1?'Há mais de um grupo Mercado. É necessário selecionar o grupo correto.':'O grupo Mercado não foi encontrado nesta conta.');const chat=matches[0];await marketHeartbeat(chat.id._serialized,config);
-  let activated=await read('whatsapp:cloud:activated');if(!activated){activated=String(Date.now());await put('whatsapp:cloud:activated',activated)}
-  const state=await getMarketState(),messages=await chat.fetchMessages({limit:200});let count=0;
-  for(const m of messages){if(Date.now()-started>210000)throw Error('A sincronização atingiu o limite de tempo. Os registros já recebidos foram preservados.');if(m.type!=='chat'||!m.body?.trim())continue;const messageId=digest(sdkId(m.id)),previous=state.messages[messageId];if(m.timestamp*1000<Number(activated)&&!previous)continue;
+  const weekStart=marketWeekStart(new Date(started)),limit=2000;
+  const state=await getMarketState(),messages=(await chat.fetchMessages({limit})).sort((a:any,b:any)=>a.timestamp-b.timestamp);let count=0;
+  const historyLimited=messages.length>=limit&&messages[0].timestamp*1000>=weekStart;
+  for(const m of messages){if(Date.now()-started>210000)throw Error('A sincronização atingiu o limite de tempo. Os registros já recebidos foram preservados.');if(m.type!=='chat'||!m.body?.trim())continue;const messageId=digest(sdkId(m.id)),previous=state.messages[messageId];if(m.timestamp*1000<weekStart||m.timestamp*1000>started)continue;
    if(!(await marketConfig()).enabled)throw Error('Conexão desativada.');
    await processMarketEvent({kind:'message',groupId:chat.id._serialized,messageId,at:m.timestamp*1000,text:m.body.slice(0,4000)});count++;
    const reactions=await m.getReactions();const seen=new Set<string>();
@@ -59,7 +67,7 @@ export async function runCloudJob(id:string,pair:boolean){
   stage='salvamento da sessão';
   await client.destroy();client=undefined;finished=true;
   await put('whatsapp:cloud:session',sealWhatsApp(await archiveProfile(authPath),secret()));
-  const synced=new Date().toISOString();await put('whatsapp:cloud:last-sync',synced);phase='conectado';await status(phase,`${count} mensagem(ns) verificada(s). ${messages.length>=200?'Foram consultadas as últimas 200 mensagens; confira períodos com muitas mensagens.':'Sincronização concluída.'}`,{count});
+  const synced=new Date().toISOString();await put('whatsapp:cloud:last-sync',synced);phase='conectado';await status(phase,`${count} mensagem(ns) verificada(s). ${historyLimited?'Histórico parcial: o grupo ultrapassou o limite de 2.000 mensagens; nem todos os itens da semana podem ter sido recuperados.':'Itens da semana atual verificados, desde segunda-feira (Brasília).'}`,{count});
  }catch(e){const text=e instanceof Error?e.message:'';const safe=/^(O WhatsApp|O tempo|A conexão|O grupo|Há mais|A sincronização|Conexão desativada|Sessão maior)/.test(text)?text:`Falha na etapa: ${stage}. Código: ${/Protocol error|Target closed|Session closed|Connection closed/.test(text)?'WA_BROWSER_CLOSED':/ENOENT|executable|shared libraries/.test(text)?'WA_BROWSER_START':/Evaluation failed|Cannot read properties/.test(text)?'WA_WEB_INIT':'WA_SESSION'}.`;console.error('WhatsApp cloud failure',{stage,code:/Protocol error|Target closed|Session closed|Connection closed/.test(text)?'WA_BROWSER_CLOSED':/ENOENT|executable|shared libraries/.test(text)?'WA_BROWSER_START':/Evaluation failed|Cannot read properties/.test(text)?'WA_WEB_INIT':'WA_SESSION',errorType:e instanceof Error?e.name:'Unknown'});await status('erro',safe).catch(()=>{});
  }finally{finished=true;if(client)await client.destroy().catch(()=>{});if(dir)await rm(dir,{recursive:true,force:true}).catch(()=>{});await sql().query("DELETE FROM planner_settings WHERE key='whatsapp:cloud:qr'",[]).catch(()=>{});await sql().query("DELETE FROM planner_settings WHERE key='whatsapp:cloud:lock' AND (value::jsonb->>'id')=$1",[id]).catch(()=>{});}
 }
