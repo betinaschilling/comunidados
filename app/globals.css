@@ -18,3 +18,5 @@
 .treinus-plan{padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--paper);margin:18px 0}.treinus-plan p{white-space:pre-wrap;line-height:1.7;font-size:12px}.treinus-plan h3{font-size:14px}
 
 .household-daily{margin-top:20px}
+
+.whatsapp-market{margin-top:24px}.whatsapp-market p{font-size:12px;line-height:1.7}.whatsapp-market summary{cursor:pointer;font-weight:600}.whatsapp-market ol{padding-left:20px;font-size:12px;line-height:1.9}.whatsapp-market a{text-decoration:underline}.bridge-key,.market-review{padding:16px;margin:16px 0;border:1px solid var(--line);border-radius:8px}.bridge-key label,.market-review label{display:flex;flex-direction:column;gap:8px;font-size:12px}.bridge-key input,.market-review input{padding:10px;border:1px solid var(--line);border-radius:7px;max-width:100%;width:100%;background:white}.market-review>p{white-space:pre-wrap}.market-reviews{margin-top:24px}

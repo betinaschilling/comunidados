@@ -1,0 +1,5 @@
+{
+ "name":"comuni-whatsapp-bridge","version":"1.0.0","private":true,"type":"module",
+ "scripts":{"start":"node --env-file=.env bridge.mjs","check":"node --check bridge.mjs"},
+ "dependencies":{"whatsapp-web.js":"1.34.7","qrcode":"1.5.4"}
+}

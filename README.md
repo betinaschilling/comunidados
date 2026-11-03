@@ -45,3 +45,7 @@ Quatro seções: Contas, Manutenções, Projetos e Lazer e diversão. Compromiss
 ## Garmin pessoal
 
 GARMIN_PERSONAL_API_KEY somente nas variáveis sensíveis da Vercel Production. API oficial: https://developer.garmin.com/gc-developer-program/personal/swagger-docs/. Sincronização manual autenticada em Rotina & saúde, até 90 dias. Atividades ficam no banco privado, identificadas pelo ID Garmin; só Corrida/Gym com data e modalidade correspondentes são vinculadas. Respostas e logs não expõem chaves. Não feito explícito, ambiguidades e treinos fora da agenda ficam para revisão; reimportar não desfaz marcações manuais. Fotos e notas são preservadas. A primeira consulta real valida a chave e o formato de resposta; testes locais usam fixtures do contrato oficial.
+
+## WhatsApp · Mercado
+
+Receptor e gerenciamento em /api/whatsapp/events e /api/whatsapp/market. Somente a proprietária gera/revoga a chave, armazenada como hash. A ponte em integrations/whatsapp requer processo separado com sessão e fila em disco persistente; a Vercel não hospeda o cliente contínuo. O identificador do grupo é fixado na primeira conexão. Mensagens/re ações ficam no banco privado, com gravação atômica e deduplicação. A implantação do código não autentica WhatsApp: gerar a chave, iniciar a ponte e parear por QR code são etapas necessárias. Guia: integrations/whatsapp/README.md.
