@@ -10,22 +10,30 @@
     "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@sparticuz/chromium": "^143.0.4",
+    "@vercel/blob": "latest",
+    "archiver": "^7.0.1",
+    "lucide-react": "latest",
     "next": "^16.0.0",
+    "next-auth": "5.0.0-beta.30",
+    "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "next-auth": "5.0.0-beta.30",
-    "@neondatabase/serverless": "^1.0.2",
-    "@vercel/blob": "latest",
-    "lucide-react": "latest",
-    "recharts": "^3.0.0"
+    "recharts": "^3.0.0",
+    "unzipper": "^0.12.3",
+    "whatsapp-web.js": "^1.34.7"
   },
   "devDependencies": {
-    "typescript": "^5.9.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/archiver": "^7.0.0",
     "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/unzipper": "^0.10.11",
     "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
-    "tsx": "^4.20.0"
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
   }
 }

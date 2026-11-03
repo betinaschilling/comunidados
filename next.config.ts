@@ -1,1 +1,1 @@
-import type {NextConfig} from "next"; const config:NextConfig={}; export default config;
+import type {NextConfig} from "next"; const config:NextConfig={serverExternalPackages:["whatsapp-web.js","@sparticuz/chromium","archiver","unzipper","qrcode"],outputFileTracingIncludes:{"/api/whatsapp/cloud":["./node_modules/@sparticuz/chromium/bin/**/*"],"/api/cron/whatsapp":["./node_modules/@sparticuz/chromium/bin/**/*"]}}; export default config;

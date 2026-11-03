@@ -1,4 +1,19 @@
-# Ponte WhatsApp → Mercado do ComuniDados
+# WhatsApp Mercado na Vercel — consulta diária
+
+O modo principal está em `app/api/whatsapp/cloud` e `app/api/cron/whatsapp`: uma Function abre um Chromium temporário, lê o grupo e encerra. Não precisa hospedar a ponte continuamente.
+
+1. Em Casa & família → WhatsApp · grupo Mercado, gere/copie a chave da conexão.
+2. Na Vercel, crie a variável sensível `CRON_SECRET` para Production com essa mesma chave. Salve e faça um novo deployment. A Vercel envia a variável no cabeçalho Authorization do Cron; o receptor compara seu hash com a chave autorizada no banco.
+3. No planner, clique em Conectar WhatsApp por QR code. Escaneie em WhatsApp → Aparelhos conectados → Conectar aparelho. Aguarde o aviso de salvamento concluído (pode levar cerca de um minuto após o pareamento).
+4. O agendamento é `0 11 * * *` UTC, por volta de 8h de Brasília; o plano Hobby pode variar dentro da hora agendada. “Sincronizar agora” permite um teste manual autenticado.
+
+A sessão é compactada e cifrada com AES-256-GCM, com chave derivada de AUTH_SECRET, antes de ser guardada no Neon privado. Alterar AUTH_SECRET exige novo pareamento. Os QR codes também são cifrados, expiram rapidamente e só são servidos à proprietária autenticada. Nenhum token, QR ou arquivo de sessão faz parte do repositório.
+
+O trabalho tem bloqueio contra concorrência, prazo máximo de cinco minutos e verifica as últimas 200 mensagens de texto do grupo fixado, desde a ativação, além das reações atuais dos itens nessa janela. Reações removidas são reconciliadas. Mensagens mais antigas fora da janela não têm atualização garantida. Nenhuma mídia é baixada. A primeira conexão real depende de validação com o WhatsApp e pode falhar caso o serviço rejeite o ambiente. O uso é não oficial, sujeito a desconexões ou bloqueio do número. Para revalidar sessão expirada, use “Parear novamente”.
+
+Desativar conexão revoga a chave e impede consultas seguintes; para remover o aparelho do WhatsApp, use Aparelhos conectados no celular. Ao substituir a chave, atualize CRON_SECRET e publique novamente.
+
+## Alternativa: ponte contínua fora das Functions
 
 Conexão não oficial usando whatsapp-web.js. Pode desconectar ou resultar em bloqueio pelo WhatsApp. A ponte precisa permanecer ligada em um computador ou servidor com armazenamento persistente. O projeto Next.js na Vercel recebe os eventos. A ponte atual usa disco persistente; uma implantação em Vercel Daemons exige adaptar a sessão e a fila para armazenamento externo, pois o disco dos Daemons é temporário. Essa adaptação ainda não está ativada.
 

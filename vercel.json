@@ -1,6 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "npm ci",
-  "buildCommand": "npm test && npm run build"
+  "installCommand": "PUPPETEER_SKIP_DOWNLOAD=true npm ci",
+  "buildCommand": "npm test && npm run build",
+  "crons": [
+    {
+      "path": "/api/cron/whatsapp",
+      "schedule": "0 11 * * *"
+    }
+  ]
 }

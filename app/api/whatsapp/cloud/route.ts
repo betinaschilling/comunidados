@@ -1,0 +1,6 @@
+import {after} from 'next/server';
+import {isOwner} from '@/auth';import {json,sameOrigin} from '@/lib/planner';
+import {cloudSummary,cloudQr,claimCloudJob,runCloudJob} from '@/lib/whatsapp-cloud';
+export const runtime='nodejs';export const dynamic='force-dynamic';export const maxDuration=300;
+export async function GET(req:Request){if(!await isOwner())return json({error:'Entre para continuar.'},401);try{if(new URL(req.url).searchParams.get('qr')==='1'){const qr=await cloudQr();if(!qr)return json({error:'QR code expirado. Aguarde o próximo código.'},404);const qrcode=await import('qrcode');return new Response(new Uint8Array(await qrcode.toBuffer(qr)),{headers:{'Content-Type':'image/png','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});}return json(await cloudSummary())}catch{return json({error:'Não foi possível consultar a conexão.'},500)}}
+export async function POST(req:Request){if(!await isOwner())return json({error:'Entre para continuar.'},401);if(!sameOrigin(req))return json({error:'Origem inválida.'},403);try{const b=await req.json();if(!['pair','sync'].includes(b.action))return json({error:'Operação inválida.'},400);const pair=b.action==='pair',id=await claimCloudJob(pair);after(()=>runCloudJob(id,pair));return json({ok:true},202)}catch(e){return json({error:e instanceof Error?e.message:'Não foi possível iniciar.'},400)}}

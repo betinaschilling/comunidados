@@ -5,6 +5,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+env:
+  PUPPETEER_SKIP_DOWNLOAD: "true"
 permissions:
   contents: read
 concurrency:

@@ -49,3 +49,7 @@ GARMIN_PERSONAL_API_KEY somente nas variáveis sensíveis da Vercel Production. 
 ## WhatsApp · Mercado
 
 Receptor e gerenciamento em /api/whatsapp/events e /api/whatsapp/market. Somente a proprietária gera/revoga a chave, armazenada como hash. A ponte em integrations/whatsapp requer processo separado com sessão e fila em disco persistente; a Vercel não hospeda o cliente contínuo. O identificador do grupo é fixado na primeira conexão. Mensagens/re ações ficam no banco privado, com gravação atômica e deduplicação. A implantação do código não autentica WhatsApp: gerar a chave, iniciar a ponte e parear por QR code são etapas necessárias. Guia: integrations/whatsapp/README.md.
+
+## WhatsApp diário na Vercel
+
+O modo diário usa Functions com Chromium temporário e Cron `0 11 * * *` UTC. A proprietária pareia em Casa & família; a sessão é cifrada com AES-256-GCM usando chave derivada de AUTH_SECRET e guardada no Neon. Configure CRON_SECRET em Production com a mesma chave gerada pela integração e publique novamente. Consulte integrations/whatsapp/README.md. Pareamento e importação reais exigem o primeiro teste com o WhatsApp; código publicado não significa conta já conectada.
